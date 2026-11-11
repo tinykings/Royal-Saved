@@ -1,0 +1,26 @@
+/* Royal Saved, on top of the extension's stylesheet (shared/style.css). */
+main[hidden] { display: none; }
+.noscript { max-width: 720px; margin: 40px auto; padding: 0 16px; }
+
+/* Header: crown, title, and the account button on the right. */
+header .account { margin-left: auto; padding: 6px 14px; }
+@media (max-width: 719px) { header { flex-wrap: nowrap; } }
+
+.intro { margin: 32px 0 16px; text-align: center; }
+.intro h2 { margin: 0 0 8px; font-size: 22px; }
+.intro p { margin: 0 auto; max-width: 52ch; color: var(--muted); }
+
+#notice[hidden], #undo[hidden] { display: none; }
+.undo { margin: 8px 0; font-size: 14px; color: var(--muted); }
+.undo span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.undo button { padding: 4px 14px; font-size: 14px; }
+
+/* Rows here are always Saved's, so the player sits right under the header. */
+#player { margin-top: 8px; }
+
+footer { margin-top: 32px; }
+.settings-panel { font-size: 15px; }
+.settings-panel summary { cursor: pointer; font-weight: 600; color: var(--muted); }
+.settings-panel .settings { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 4px 20px 8px; margin: 12px 0; }
+.settings-panel .settings label:first-of-type { border-top: 0; }
+#sync-status:empty { display: none; }
