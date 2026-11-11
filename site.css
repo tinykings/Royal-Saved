@@ -24,3 +24,20 @@ footer { margin-top: 32px; }
 .settings-panel .settings { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 4px 20px 8px; margin: 12px 0; }
 .settings-panel .settings label:first-of-type { border-top: 0; }
 #sync-status:empty { display: none; }
+
+/* Unsave: a heart tag tucked behind the post's right edge that slides out on hover
+   (or keyboard focus). On touch screens, with no hover, it stays out. */
+.post button.save {
+  top: 12px; right: 0; bottom: auto; z-index: 3; width: 44px; height: 36px; padding: 0 0 0 4px;
+  border-radius: 999px 0 0 999px; background: var(--heart); color: white; opacity: 1;
+  box-shadow: -2px 2px 8px rgb(0 0 0 / .25);
+  translate: 100% 0; transition: translate .2s ease, filter .15s;
+}
+.post button.save svg { width: 20px; height: 20px; }
+.post:hover button.save, .post:focus-within button.save { opacity: 1; translate: 0 0; }
+.post button.save:hover, .post button.save:focus-visible { color: white; transform: none; filter: brightness(1.12); }
+.post button.save:focus-visible { outline-offset: -3px; }
+.post.row button.save { top: 50%; margin-top: -18px; }
+/* The heart no longer sits on the text, so the text can use the full width. */
+.post .meta, .post.row .details { padding-right: 0; }
+@media (hover: none) { .post button.save { translate: 0 0; } }

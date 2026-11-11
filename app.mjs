@@ -100,9 +100,6 @@ const player = $("#player");
 const header = $("header");
 new ResizeObserver(() => document.documentElement.style.setProperty("--header-height", `${header.offsetHeight}px`)).observe(header);
 let playingID = null;
-function markPlaying() {
-  for (const item of document.querySelectorAll("li.post")) item.classList.toggle("playing", item.dataset.postId === playingID);
-}
 function play(post) {
   playingID = post.id;
   player.querySelector("iframe").src = `https://www.youtube.com/embed/${encodeURIComponent(post.videoId)}?autoplay=1&rel=0`;
@@ -110,14 +107,14 @@ function play(post) {
   $("#player-label").textContent = post.label;
   $("#player-open").href = post.url;
   player.hidden = false;
-  markPlaying();
+  render();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 $("#player-close").addEventListener("click", () => {
   playingID = null;
   player.hidden = true;
   player.querySelector("iframe").src = "about:blank";
-  markPlaying();
+  render();
 });
 function playsHere(anchor, post) {
   if (!post.videoId || preferences.youtubePlayback !== "inApp") return;
@@ -143,12 +140,13 @@ function blursNSFW(anchor, post) {
   });
 }
 
-// Saved mixes every source, so posts are rows with a small thumbnail, as in the
-// extension and on iOS.
+// Posts are cards with a large image above the text. While a video plays, they turn
+// into rows with a small thumbnail, so more of the list fits beside the player.
 function renderPost(post) {
   const comments = opensComments(post, preferences);
   const href = comments ? post.commentsUrl : post.url;
-  const item = element("li", `post row${post.videoId ? " video" : ""}`);
+  const card = playingID === null;
+  const item = element("li", `post ${card ? "card" : "row"}${post.videoId ? " video" : ""}`);
   item.dataset.postId = post.id;
   item.classList.toggle("playing", post.id === playingID);
   const body = element("div", "details");
@@ -175,16 +173,28 @@ function renderPost(post) {
 
   const src = thumbnail(post);
   if (src) {
-    const anchor = link(href, null, "thumb");
+    const anchor = link(href, null, card ? "media" : "thumb");
     anchor.tabIndex = -1;
     anchor.setAttribute("aria-hidden", "true");
     const img = image(src);
     // A dead image (an old Reddit preview link, say) leaves the post as text.
     img.addEventListener("error", () => anchor.remove(), { once: true });
+    if (card && !post.videoId && post.imageAspect) {
+      // Very tall or wide images are shown whole, on a blurred copy that fills the card.
+      const aspect = Math.min(Math.max(post.imageAspect, 0.8), 2);
+      anchor.style.setProperty("--aspect", String(aspect));
+      if (Math.abs(aspect - post.imageAspect) > 0.01) {
+        img.classList.add("fit");
+        const backdrop = image(src);
+        backdrop.classList.add("backdrop");
+        anchor.append(backdrop);
+      }
+    } else if (card && post.videoId) anchor.style.setProperty("--aspect", "16 / 9");
     anchor.append(img);
     blursNSFW(anchor, post);
     playsHere(anchor, post);
-    item.append(anchor);
+    if (card) item.prepend(anchor);
+    else item.append(anchor);
   }
 
   const save = element("button", "save");
