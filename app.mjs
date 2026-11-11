@@ -93,7 +93,12 @@ function heart() {
 
 const SOURCE_NAMES = { reddit: "Reddit", hn: "Hacker News", youtube: "YouTube" };
 const SOURCE_MARKS = { reddit: "r", hn: "Y", youtube: "" };
-const thumbnail = post => (post.videoId ? `https://i.ytimg.com/vi/${encodeURIComponent(post.videoId)}/hqdefault.jpg` : post.image);
+// YouTube thumbnails, sharpest first: 1280×720, then 640×480, then 480×360, which
+// every video has. A size a video lacks comes back as a 404 or a 120×90 gray stand-in.
+const YOUTUBE_SIZES = ["maxresdefault", "sddefault", "hqdefault"];
+const thumbnails = post => (post.videoId
+  ? YOUTUBE_SIZES.map(size => `https://i.ytimg.com/vi/${encodeURIComponent(post.videoId)}/${size}.jpg`)
+  : post.image ? [post.image] : []);
 
 // --- Player, docked under the header. ---
 const player = $("#player");
@@ -171,14 +176,19 @@ function renderPost(post) {
   body.append(meta);
   item.append(body);
 
-  const src = thumbnail(post);
+  const [src, ...fallbacks] = thumbnails(post);
   if (src) {
     const anchor = link(href, null, card ? "media" : "thumb");
     anchor.tabIndex = -1;
     anchor.setAttribute("aria-hidden", "true");
     const img = image(src);
     // A dead image (an old Reddit preview link, say) leaves the post as text.
-    img.addEventListener("error", () => anchor.remove(), { once: true });
+    const next = () => {
+      if (fallbacks.length) img.src = fallbacks.shift();
+      else anchor.remove();
+    };
+    img.addEventListener("error", next);
+    if (post.videoId) img.addEventListener("load", () => { if (img.naturalWidth <= 120) next(); });
     if (card && !post.videoId && post.imageAspect) {
       // Very tall or wide images are shown whole, on a blurred copy that fills the card.
       const aspect = Math.min(Math.max(post.imageAspect, 0.8), 2);
