@@ -14,7 +14,7 @@ import { runSync, SyncPausedError } from "./shared/sync-runner.mjs";
 // A web API token identifies the app, not a user, and is meant to be public.
 export const SITE_CLOUDKIT = Object.freeze({
   ...ROYAL_CLOUDKIT,
-  apiToken: "",
+  apiToken: "984378b0e9f112a1fff7bac52fab23c69e168e4687138d2289b5139bb5f0aa10",
 });
 
 export const TOKEN_KEY = "royalCloudKitToken";
